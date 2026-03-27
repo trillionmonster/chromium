@@ -1,0 +1,139 @@
+# Copyright 2024 The Chromium Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/features.gni")
+import("//tools/grit/grit_rule.gni")
+
+source_set("ai_browser") {
+  sources = [
+    "ai_browser_prefs.cc",
+    "ai_browser_prefs.h",
+    "ai_browser_service.cc",
+    "ai_browser_service.h",
+    "ai_browser_service_factory.cc",
+    "ai_browser_service_factory.h",
+    "ai_browser_tab_helper.cc",
+    "ai_browser_tab_helper.h",
+    "ai_client.cc",
+    "ai_client.h",
+    "auto_login_manager.cc",
+    "auto_login_manager.h",
+    "page_reader.cc",
+    "page_reader.h",
+    "parallel_tab_manager.cc",
+    "parallel_tab_manager.h",
+    "search_dispatcher.cc",
+    "search_dispatcher.h",
+    "session_persistence.cc",
+    "session_persistence.h",
+    "smart_scroller.cc",
+    "smart_scroller.h",
+    "stealth_injector.cc",
+    "stealth_injector.h",
+  ]
+
+  deps = [
+    "//base",
+    "//components/keyed_service/content",
+    "//components/keyed_service/core",
+    "//components/prefs",
+    "//content/public/browser",
+    "//net",
+    "//services/network/public/cpp",
+    "//services/network/public/mojom",
+    "//url",
+  ]
+}
+
+source_set("api") {
+  sources = [
+    "api/ai_browser_api_server.cc",
+    "api/ai_browser_api_server.h",
+    "api/api_handler.cc",
+    "api/api_handler.h",
+  ]
+
+  deps = [
+    ":ai_browser",
+    "//base",
+    "//net",
+    "//net/server:http_server",
+    "//content/public/browser",
+  ]
+}
+
+grit("ai_settings_resources") {
+  source = "ui/ai_settings_resources.grd"
+  outputs = [
+    "grit/ai_settings_resources.h",
+    "ai_settings_resources.pak",
+  ]
+}
+
+source_set("ui") {
+  sources = [
+    "ui/ai_settings_handler.cc",
+    "ui/ai_settings_handler.h",
+    "ui/ai_settings_ui.cc",
+    "ui/ai_settings_ui.h",
+  ]
+
+  deps = [
+    ":ai_browser",
+    ":ai_settings_resources",
+    "//base",
+    "//content/public/browser",
+    "//chrome/browser/profiles",
+    "//services/network/public/mojom",
+  ]
+}
+
+# Unit tests — build with:
+#   autoninja -C out/Default ai_browser_unittests
+#   ./out/Default/ai_browser_unittests
+source_set("unit_tests") {
+  testonly = true
+
+  sources = [
+    "ai_browser_prefs_unittest.cc",
+    "ai_browser_service_unittest.cc",
+    "ai_client_unittest.cc",
+    "api/api_handler_unittest.cc",
+    "page_reader_unittest.cc",
+    "parallel_tab_manager_unittest.cc",
+    "search_dispatcher_unittest.cc",
+    "session_persistence_unittest.cc",
+    "smart_scroller_unittest.cc",
+    "stealth_injector_unittest.cc",
+  ]
+
+  deps = [
+    ":ai_browser",
+    ":api",
+    "//base",
+    "//base/test:test_support",
+    "//components/prefs",
+    "//components/prefs:test_support",
+    "//content/public/browser",
+    "//content/test:test_support",
+    "//net",
+    "//services/network:test_support",
+    "//services/network/public/cpp",
+    "//testing/gtest",
+    "//url",
+  ]
+}
+
+# Executable test runner.
+test("ai_browser_unittests") {
+  sources = [
+    "//base/test/run_all_unittests.cc",
+  ]
+
+  deps = [
+    ":unit_tests",
+    "//base",
+    "//base/test:test_support",
+  ]
+}
